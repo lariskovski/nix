@@ -63,6 +63,8 @@ nix run home-manager/release-25.05 -- switch --flake github:lariskovski/nix#home
 
 ## Good Resources
 
+[Nix is my favorite package manager to use on macOS](https://www.youtube.com/watch?v=Z8BL8mdzWHI)
+
 https://github.com/thexyno/nixos-config
 
 https://evantravers.com/articles/2024/02/06/switching-to-nix-darwin-and-flakes/
