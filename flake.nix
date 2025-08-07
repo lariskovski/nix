@@ -12,132 +12,163 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs @ { self, nixpkgs, home-manager, nix-darwin, nix-homebrew, mac-app-util, ... }:
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      home-manager,
+      nix-darwin,
+      nix-homebrew,
+      mac-app-util,
+      ...
+    }:
     let
       system = builtins.currentSystem;
       username = "larissa";
       sharedHomeManagerModules = [
-        ({ pkgs, ... }: {
-          nixpkgs.config.allowUnfree = true;
+        (
+          { pkgs, ... }:
+          {
+            nixpkgs.config.allowUnfree = true;
 
-          # Common packages for both macOS and Linux
-          home.packages = with pkgs; [
-            vim
-            nixpkgs-fmt
-            atuin
-            zsh
-            zsh-autosuggestions
-            zsh-completions
-            zsh-powerlevel10k
-            zsh-syntax-highlighting
-            oh-my-zsh
-            git
-            gh
-            go
-            vscode
-            awscli2
-            google-cloud-sdk
-            kubectl
-            kubectx
-            terraform
-            ngrok
-          ];
+            # Common packages for both macOS and Linux
+            home.packages = with pkgs; [
+              alacritty
+              tmux
+              vim
+              nixfmt-rfc-style
+              atuin
+              direnv
+              zsh
+              zsh-autosuggestions
+              zsh-completions
+              zsh-powerlevel10k
+              zsh-syntax-highlighting
+              oh-my-zsh
+              git
+              gh
+              go
+              vscode
+              awscli2
+              google-cloud-sdk
+              kubectl
+              kubectx
+              terraform
+              ngrok
+            ];
 
-          programs.git = {
-            enable = true;
-            extraConfig = {
-              user.name = "lariskovski";
-              user.email = "larissaporto@live.com";
-              init.defaultBranch = "main";
-            };
-          };
-
-          programs.zsh = {
-            enable = true;
-            enableCompletion = true;
-            oh-my-zsh = {
+            programs.git = {
               enable = true;
-              # plugins = [ "git" ];
+              extraConfig = {
+                user.name = "lariskovski";
+                user.email = "larissaporto@live.com";
+                init.defaultBranch = "main";
+              };
             };
-            initExtra =
-              let
-                p10k = builtins.readFile ./.p10k.zsh;
-                sources = [
-                  "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
-                  "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-                  "${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-                ];
-                source = map (x: "source ${x}") sources;
-              in ''
-                # Set editor environment variables
-                export EDITOR=vim
-                export VISUAL=vim
-                
-                # Add completions to fpath
-                fpath+=${pkgs.zsh-completions}/share/zsh-completions
-                ${p10k}
-                ${builtins.concatStringsSep "\n" source}
-              '';
-          };
 
-          home.stateVersion = "25.05";
-        })
+            programs.zsh = {
+              enable = true;
+              enableCompletion = true;
+              oh-my-zsh = {
+                enable = true;
+                # plugins = [ "git" ];
+              };
+              initExtra =
+                let
+                  # zshrc = builtins.readFile ../../.zshrc;
+                  p10k = builtins.readFile ../../.p10k.zsh;
+                  sources = [
+                    "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
+                    "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+                    "${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+                  ];
+                  source = map (x: "source ${x}") sources;
+                in
+                ''
+                  # Set editor environment variables
+                  export EDITOR=vim
+                  export VISUAL=vim
+
+                  . "$HOME/.atuin/bin/env"
+                  eval "$(atuin init zsh)"
+
+                  # Add completions to fpath
+                  fpath+=${pkgs.zsh-completions}/share/zsh-completions
+                  ${p10k}
+                  ${builtins.concatStringsSep "\n" source}
+                '';
+            };
+
+            home.stateVersion = "25.05";
+          }
+        )
       ];
-    in {
+    in
+    {
       # macOS system config
       darwinConfigurations."The-Unreliable-MacBook-Pro" = nix-darwin.lib.darwinSystem {
         system = "x86_64-darwin";
         modules = [
-          ({ pkgs, ... }: {
-            nix.settings.experimental-features = "nix-command flakes";
-            nixpkgs.config.allowUnfree = true;
+          (
+            { pkgs, ... }:
+            {
+              nix.settings.experimental-features = "nix-command flakes";
+              nixpkgs.config.allowUnfree = true;
 
-            environment.systemPackages = with pkgs; [
-              mkalias
-              iterm2
-              maccy
-              stats
-              spotify
-              rectangle
-            ];
-
-            fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
-
-            users.users.${username} = {
-              name = username;
-              home = "/Users/${username}";
-            };
-
-            system.primaryUser = username;
-            system.stateVersion = 6;
-
-            system.defaults = {
-              dock.autohide = true;
-              dock.orientation = "bottom";
-              dock.persistent-apps = [
-                "/System/Applications/Mail.app"
-                "${pkgs.vscode}/Applications/Visual Studio Code.app"
-                "${pkgs.iterm2}/Applications/iTerm2.app"
-                "${pkgs.spotify}/Applications/Spotify.app"
-                "/Applications/WhatsApp.app"
+              environment.systemPackages = with pkgs; [
+                mkalias
+                # iterm2
+                maccy
+                stats
+                spotify
+                rectangle
+                # slack
               ];
-              NSGlobalDomain.AppleInterfaceStyle = "Dark";
-              NSGlobalDomain.AppleShowScrollBars = "Always";
-            };
 
-            homebrew = {
-              enable = true;
-              brews = [ "mas" ];
-              masApps = { "WhatsApp" = 310633997; };
-              onActivation = {
-                cleanup = "zap";
-                autoUpdate = true;
-                upgrade = true;
+              fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
+
+              users.users.${username} = {
+                name = username;
+                home = "/Users/${username}";
               };
-            };
 
-            system.configurationRevision = self.rev or self.dirtyRev or null;
-          })
+              system.primaryUser = username;
+              system.stateVersion = 6;
+
+              system.defaults = {
+                dock.autohide = true;
+                dock.orientation = "bottom";
+                dock.persistent-apps = [
+                  "/System/Applications/Mail.app"
+                  "${pkgs.vscode}/Applications/Visual Studio Code.app"
+                  # "${pkgs.iterm2}/Applications/iTerm2.app"
+                  "${pkgs.alacritty}/Applications/Alacritty.app"
+                  "${pkgs.spotify}/Applications/Spotify.app"
+                  "/Applications/WhatsApp.app"
+                ];
+                NSGlobalDomain.AppleInterfaceStyle = "Dark";
+                NSGlobalDomain.AppleShowScrollBars = "Always";
+              };
+
+              homebrew = {
+                enable = true;
+                brews = [ "mas" ];
+                casks = [
+                  "orbstack"
+                ];
+                masApps = {
+                  "WhatsApp" = 310633997;
+                };
+                onActivation = {
+                  cleanup = "zap";
+                  autoUpdate = true;
+                  upgrade = true;
+                };
+              };
+
+              system.configurationRevision = self.rev or self.dirtyRev or null;
+            }
+          )
 
           home-manager.darwinModules.home-manager
           mac-app-util.darwinModules.default
@@ -163,9 +194,12 @@
           system = "x86_64-linux";
           config.allowUnfree = true;
         };
-        modules = sharedHomeManagerModules;
-        username = username;
-        homeDirectory = "/home/${username}";
+        modules = sharedHomeManagerModules ++ [
+          {
+            home.username = username;
+            home.homeDirectory = "/home/${username}";
+          }
+        ];
       };
     };
 }
