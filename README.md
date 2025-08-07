@@ -14,7 +14,7 @@ A cross-platform Nix flake configuration for both macOS and Linux systems. This 
 Run this command on a fresh macOS or Linux machine:
 
 ```bash
-sh <(curl -sL https://raw.githubusercontent.com/lariskovski/nix/main/bootstrap.sh)
+bash <(curl -sL https://raw.githubusercontent.com/lariskovski/nix/main/bootstrap.sh)
 ```
 
 ## 🛠️ How It Works
