@@ -61,7 +61,7 @@
             };
             initExtra =
               let
-                p10k = builtins.readFile ../../.p10k.zsh;
+                p10k = builtins.readFile ./.p10k.zsh;
                 sources = [
                   "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
                   "${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/git/git.plugin.zsh"
