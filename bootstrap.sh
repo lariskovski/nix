@@ -40,12 +40,21 @@ bootstrap_macos() {
   echo "🍎 Setting up macOS nix-darwin configuration..."
 
   echo "➡️ Building nix-darwin system..."
-  nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake ${REPO_URL} --no-write-lock-file
+  echo "⚠️  Note: You may be prompted for your password for system activation..."
+  sudo nix run nix-darwin --extra-experimental-features "nix-command flakes" -- switch --flake ${REPO_URL} --no-write-lock-file
 }
 
 # === MAIN ===
 
 main() {
+  # Check if running as root
+  if [[ $EUID -eq 0 ]]; then
+    echo "❌ This script should NOT be run as root/sudo!"
+    echo "💡 Run it as a regular user: sh <(curl -sL https://raw.githubusercontent.com/lariskovski/nix/main/bootstrap.sh)"
+    echo "ℹ️  The script will use sudo internally when needed for system activation."
+    exit 1
+  fi
+
   echo "🚀 Bootstrapping system for $OS ($USERNAME@$HOSTNAME)"
   # Verifica se o Nix está instalado
   if ! command -v nix &>/dev/null; then
