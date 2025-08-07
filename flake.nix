@@ -19,7 +19,7 @@
       sharedHomeManagerModules = [
         ({ pkgs, ... }: {
           nixpkgs.config.allowUnfree = true;
-          
+
           # Common packages for both macOS and Linux
           home.packages = with pkgs; [
             vim
@@ -57,19 +57,23 @@
             enableCompletion = true;
             oh-my-zsh = {
               enable = true;
-              plugins = [ "git" ];
+              # plugins = [ "git" ];
             };
             initExtra =
               let
                 p10k = builtins.readFile ./.p10k.zsh;
                 sources = [
                   "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
-                  "${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/git/git.plugin.zsh"
                   "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
                   "${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
                 ];
                 source = map (x: "source ${x}") sources;
               in ''
+                # Set editor environment variables
+                export EDITOR=vim
+                export VISUAL=vim
+                
+                # Add completions to fpath
                 fpath+=${pkgs.zsh-completions}/share/zsh-completions
                 ${p10k}
                 ${builtins.concatStringsSep "\n" source}
