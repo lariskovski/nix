@@ -61,3 +61,13 @@ nix run nix-darwin -- switch --flake github:lariskovski/nix
 nix run home-manager/release-25.05 -- switch --flake github:lariskovski/nix#homeConfigurations.larissa
 ```
 
+## Good Resources
+
+https://github.com/thexyno/nixos-config
+
+https://evantravers.com/articles/2024/02/06/switching-to-nix-darwin-and-flakes/
+
+https://github.com/ryantm/agenix
+
+https://sekun.net/blog/manage-secrets-in-nixos/
+
